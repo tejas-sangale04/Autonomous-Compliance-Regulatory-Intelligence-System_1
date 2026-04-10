@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RBI Compliance Intelligence System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fb;
+            color: #1a2a3a;
+        }
+        .header {
+            background: linear-gradient(135deg, #0f2b3d 0%, #1a4a6f 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .header p { opacity: 0.9; font-size: 1rem; }
+        .container { max-width: 1400px; margin: 2rem auto; padding: 0 1.5rem; }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .feature-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid #1a4a6f;
+        }
+        .feature-card i { font-size: 1.5rem; color: #1a4a6f; margin-bottom: 0.5rem; }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1.2fr;
+            gap: 1.5rem;
+        }
+        .panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .panel-header {
+            background: #f8fafc;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .panel-header i { margin-right: 0.5rem; color: #1a4a6f; }
+        .panel-body { padding: 1rem; max-height: 70vh; overflow-y: auto; }
+        .notif-item {
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .notif-item:hover {
+            background: #f0f7ff;
+            border-left: 4px solid #1a4a6f;
+            transform: translateX(4px);
+        }
+        .notif-title { font-weight: 500; margin-bottom: 0.25rem; }
+        .notif-date { font-size: 0.8rem; color: #64748b; }
+        .btn {
+            background: #1a4a6f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 100%;
+            margin-bottom: 0.5rem;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #0f3550; }
+        .btn-secondary { background: #e2e8f0; color: #1a2a3a; }
+        .btn-secondary:hover { background: #cbd5e1; }
+        .btn:disabled { background: #cbd5e1; cursor: not-allowed; opacity: 0.6; }
+        .api-key-input {
+            margin-bottom: 1rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .api-key-input label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .api-key-input input { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
+        .analysis-result {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            border: 1px solid #e2e8f0;
+        }
+        .analysis-result strong, .analysis-result b { font-weight: 700; color: #0f2b3d; }
+        .analysis-result em, .analysis-result i { font-style: italic; }
+        .analysis-result ul, .analysis-result ol { margin-left: 1.5rem; margin-bottom: 0.5rem; }
+        .analysis-result li { margin-bottom: 0.25rem; }
+        .analysis-result h1, .analysis-result h2, .analysis-result h3, .analysis-result h4 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .analysis-result h2 { font-size: 1.2rem; border-bottom: 1px solid #cbd5e1; padding-bottom: 0.25rem; }
+        .analysis-result code { background: #e2e8f0; padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace; }
+        .analysis-result pre { background: #e2e8f0; padding: 0.75rem; border-radius: 6px; overflow-x: auto; }
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background: #e2e8f0;
+            text-align: right;
+            margin-left: 20%;
+        }
+        .bot-message {
+            background: white;
+            border-left: 3px solid #1a4a6f;
+            margin-right: 20%;
+        }
+        .bot-message strong, .bot-message b { font-weight: 700; }
+        .bot-message em, .bot-message i { font-style: italic; }
+        .bot-message ul, .bot-message ol { margin-left: 1.5rem; }
+        .chat-input {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .chat-input button { width: auto; margin: 0; padding: 0.5rem 1rem; }
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            font-size: 0.8rem;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 2rem;
+        }
+        .loading { text-align: center; padding: 1rem; color: #1a4a6f; }
+        .rate-limit-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .message { margin-left: 0; margin-right: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-university"></i> RBI Compliance Intelligence System</h1>
+        <p>Autonomous monitoring and analysis of Reserve Bank of India notifications</p>
+    </div>
+
+    <div class="container">
+        <div class="features">
+            <div class="feature-card"><i class="fas fa-newspaper"></i><br>Real-time Monitoring</div>
+            <div class="feature-card"><i class="fas fa-brain"></i><br>AI-Powered Analysis</div>
+            <div class="feature-card"><i class="fas fa-chart-line"></i><br>Risk Assessment</div>
+            <div class="feature-card"><i class="fas fa-comments"></i><br>Smart Chatbot</div>
+        </div>
+
+        <div class="api-key-input">
+            <label><i class="fas fa-key"></i> Google Gemini API Key (required for AI features):</label>
+            <input type="password" id="apiKey" placeholder="Enter your Gemini API key (get from https://aistudio.google.com)">
+            <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">Free tier: 5 requests per minute. If you hit limit, wait 1 minute.</div>
+        </div>
+
+        <div class="main-grid">
+            <!-- Left: Notifications List -->
+            <div class="panel">
+                <div class="panel-header"><i class="fas fa-list"></i> Latest RBI Notifications</div>
+                <div class="panel-body">
+                    <button class="btn" id="refreshBtn"><i class="fas fa-sync-alt"></i> Fetch Notifications</button>
+                    <div id="notifList">
+                        <p class="loading">Click "Fetch Notifications" to load latest RBI circulars</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle: Analysis -->
+            <div class="panel">
+                <div class="panel-header"><i class="fas fa-chart-bar"></i> Regulation Analysis</div>
+                <div class="panel-body">
+                    <div id="selectedInfo" style="margin-bottom: 1rem; padding: 0.5rem; background: #f1f5f9; border-radius: 6px;">Select a notification from the left</div>
+                    <button class="btn" id="summarizeBtn" disabled><i class="fas fa-align-left"></i> Generate Summary & Risk</button>
+                    <button class="btn btn-secondary" id="actionPlanBtn" disabled><i class="fas fa-tasks"></i> Generate Action Plan</button>
+                    <div id="analysisResult" class="analysis-result" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- Right: Chatbot -->
+            <div class="panel">
+                <div class="panel-header"><i class="fas fa-comment-dots"></i> Compliance Assistant</div>
+                <div class="panel-body">
+                    <div id="chatContext" style="font-size:0.8rem; color:#64748b; margin-bottom:0.5rem;">No regulation loaded</div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message bot-message">Select a notification and ask me anything about compliance requirements.</div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Ask about this regulation...">
+                        <button class="btn" id="sendBtn" disabled><i class="fas fa-paper-plane"></i> Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Powered by Google Gemini AI | RBI Compliance Intelligence System</p>
+        <p>Direct scraping from rbi.org.in | Autonomous regulatory analysis</p>
+        <p style="margin-top: 0.5rem;">Note: Free tier allows 5 requests per minute. Please wait if you see rate limit messages.</p>
+    </div>
+
+    <script>
+        // DOM elements
+        const apiKeyInput = document.getElementById('apiKey');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const notifListDiv = document.getElementById('notifList');
+        const summarizeBtn = document.getElementById('summarizeBtn');
+        const actionPlanBtn = document.getElementById('actionPlanBtn');
+        const analysisResultDiv = document.getElementById('analysisResult');
+        const selectedInfoSpan = document.getElementById('selectedInfo');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const chatContextSpan = document.getElementById('chatContext');
+
+        let currentNotification = null;
+        let currentContent = null;
+
+        // Convert plain text with Markdown-like syntax to HTML
+        function formatMarkdown(text) {
+            if (!text) return '';
+            // Escape HTML first to avoid injection, but then we'll add our own tags
+            let escaped = escapeHtml(text);
+            // Bold: **text** or __text__
+            escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            escaped = escaped.replace(/__(.*?)__/g, '<strong>$1</strong>');
+            // Italic: *text* or _text_
+            escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            escaped = escaped.replace(/_(.*?)_/g, '<em>$1</em>');
+            // Headers (## Header)
+            escaped = escaped.replace(/^### (.*?)$/gm, '<h4>$1</h4>');
+            escaped = escaped.replace(/^## (.*?)$/gm, '<h3>$1</h3>');
+            escaped = escaped.replace(/^# (.*?)$/gm, '<h2>$1</h2>');
+            // Unordered lists: - item or * item
+            escaped = escaped.replace(/^[\-\*] (.*?)$/gm, '<li>$1</li>');
+            // Wrap consecutive list items in <ul>
+            escaped = escaped.replace(/(<li>.*?<\/li>\n?)+/g, '<ul>$&</ul>');
+            // Ordered lists: 1. item
+            escaped = escaped.replace(/^\d+\. (.*?)$/gm, '<li>$1</li>');
+            escaped = escaped.replace(/(<li>.*?<\/li>\n?)+/g, function(match) {
+                if (!match.includes('<ul>')) return '<ol>' + match + '</ol>';
+                return match;
+            });
+            // Line breaks
+            escaped = escaped.replace(/\n/g, '<br>');
+            // Fix nested ul/ol
+            escaped = escaped.replace(/<ul><br><\/ul>/g, '');
+            escaped = escaped.replace(/<ol><br><\/ol>/g, '');
+            return escaped;
+        }
+
+        // Helper: API call
+        async function apiCall(endpoint, method, body) {
+            const response = await fetch(`http://localhost:5000${endpoint}`, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : undefined
+            });
+            return response;
+        }
+
+        // Fetch notifications
+        refreshBtn.onclick = async () => {
+            notifListDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Fetching latest RBI notifications...</div>';
+            try {
+                const response = await apiCall('/api/notifications?limit=15', 'GET');
+                const data = await response.json();
+                if (data.success && data.notifications && data.notifications.length) {
+                    displayNotifications(data.notifications);
+                } else {
+                    notifListDiv.innerHTML = '<p style="color: #dc2626;">Failed to fetch notifications. Check console or try again.</p>';
+                }
+            } catch (err) {
+                console.error(err);
+                notifListDiv.innerHTML = '<p style="color: #dc2626;">Error connecting to backend. Make sure backend is running on port 5000.</p>';
+            }
+        };
+
+        function displayNotifications(notifications) {
+            notifListDiv.innerHTML = '';
+            notifications.forEach(notif => {
+                const div = document.createElement('div');
+                div.className = 'notif-item';
+                div.innerHTML = `
+                    <div class="notif-title">${escapeHtml(notif.title)}</div>
+                    <div class="notif-date"><i class="far fa-calendar-alt"></i> ${notif.date || 'Date not available'}</div>
+                `;
+                div.onclick = () => loadNotification(notif.id);
+                notifListDiv.appendChild(div);
+            });
+        }
+
+        async function loadNotification(id) {
+            selectedInfoSpan.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading notification...';
+            summarizeBtn.disabled = true;
+            actionPlanBtn.disabled = true;
+            sendBtn.disabled = true;
+            analysisResultDiv.style.display = 'none';
+            try {
+                const response = await apiCall(`/api/notification/${id}`, 'GET');
+                const data = await response.json();
+                if (data.success) {
+                    currentNotification = data.data;
+                    currentContent = currentNotification.content;
+                    selectedInfoSpan.innerHTML = `<strong>${escapeHtml(currentNotification.title)}</strong><br><small>${currentNotification.reference} | ${currentNotification.date_published}</small>`;
+                    summarizeBtn.disabled = false;
+                    actionPlanBtn.disabled = false;
+                    sendBtn.disabled = false;
+                    chatContextSpan.innerHTML = `Context: ${escapeHtml(currentNotification.title.substring(0, 60))}...`;
+                    // Clear chat
+                    chatMessages.innerHTML = '<div class="message bot-message">Regulation loaded. Ask me about compliance requirements.</div>';
+                } else {
+                    selectedInfoSpan.innerHTML = '<span style="color:#dc2626;">Failed to load notification details.</span>';
+                }
+            } catch (err) {
+                console.error(err);
+                selectedInfoSpan.innerHTML = '<span style="color:#dc2626;">Error loading notification.</span>';
+            }
+        }
+
+        function addMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender === 'user' ? 'user-message' : 'bot-message'}`;
+            // Format markdown for bot messages only
+            const formatted = sender === 'bot' ? formatMarkdown(text) : escapeHtml(text).replace(/\n/g, '<br>');
+            msgDiv.innerHTML = formatted;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showRateLimitWarning(containerElement, customMsg) {
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'rate-limit-warning';
+            warningDiv.innerHTML = `<i class="fas fa-hourglass-half"></i> ${customMsg || 'Rate limit exceeded. Please wait about 60 seconds before trying again.'}`;
+            containerElement.insertBefore(warningDiv, containerElement.firstChild);
+            setTimeout(() => {
+                if (warningDiv.parentNode) warningDiv.remove();
+            }, 8000);
+        }
+
+        // Summarize & Risk
+        summarizeBtn.onclick = async () => {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) { alert('Please enter your Gemini API key'); return; }
+            if (!currentContent) { alert('No regulation loaded'); return; }
+            analysisResultDiv.style.display = 'block';
+            analysisResultDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> AI is analyzing (may take 10-30 seconds due to rate limits)...</div>';
+            try {
+                const response = await fetch('http://localhost:5000/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: currentContent, api_key: apiKey })
+                });
+                const data = await response.json();
+                if (response.status === 429) {
+                    analysisResultDiv.innerHTML = `<span style="color:#856404;">⚠️ Rate limit exceeded. Gemini free tier allows 5 requests per minute. Please wait about 60 seconds and try again.</span>`;
+                    showRateLimitWarning(analysisResultDiv, 'Too many requests. Please wait.');
+                } else if (data.success) {
+                    analysisResultDiv.innerHTML = `<strong>AI Analysis:</strong><br>${formatMarkdown(data.analysis)}`;
+                } else {
+                    analysisResultDiv.innerHTML = `<span style="color:#dc2626;">Error: ${escapeHtml(data.error)}</span>`;
+                }
+            } catch (err) {
+                analysisResultDiv.innerHTML = `<span style="color:#dc2626;">Request failed: ${escapeHtml(err.message)}</span>`;
+            }
+        };
+
+        // Action Plan
+        actionPlanBtn.onclick = async () => {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) { alert('Please enter your Gemini API key'); return; }
+            if (!currentContent) { alert('No regulation loaded'); return; }
+            analysisResultDiv.style.display = 'block';
+            analysisResultDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Generating action plan...</div>';
+            try {
+                const response = await fetch('http://localhost:5000/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: "Create a detailed action plan including: immediate steps (next 24-48 hours), short-term actions (30 days), long-term actions (90 days), responsible departments, and compliance timeline. Use markdown formatting with bold, headings, and lists for clarity.",
+                        context: currentContent,
+                        api_key: apiKey
+                    })
+                });
+                const data = await response.json();
+                if (response.status === 429) {
+                    analysisResultDiv.innerHTML = `<span style="color:#856404;">⚠️ Rate limit exceeded. Please wait about 60 seconds before generating another report.</span>`;
+                    showRateLimitWarning(analysisResultDiv, 'Rate limit hit. Please wait.');
+                } else if (data.success) {
+                    analysisResultDiv.innerHTML = `<strong>Action Plan:</strong><br>${formatMarkdown(data.answer)}`;
+                } else {
+                    analysisResultDiv.innerHTML = `<span style="color:#dc2626;">Error: ${escapeHtml(data.error)}</span>`;
+                }
+            } catch (err) {
+                analysisResultDiv.innerHTML = `<span style="color:#dc2626;">Request failed: ${escapeHtml(err.message)}</span>`;
+            }
+        };
+
+        // Chat send
+        sendBtn.onclick = async () => {
+            const question = chatInput.value.trim();
+            if (!question) return;
+            if (!currentContent) { alert('Please load a regulation first'); return; }
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) { alert('Please enter your Gemini API key'); return; }
+
+            addMessage(question, 'user');
+            chatInput.value = '';
+            const thinkingId = addMessageWithReturn('<i class="fas fa-spinner fa-spin"></i> AI is thinking...', 'bot');
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question: question,
+                        context: currentContent,
+                        api_key: apiKey
+                    })
+                });
+                const data = await response.json();
+                // Remove thinking message
+                const lastMsg = chatMessages.lastChild;
+                if (lastMsg && lastMsg.innerHTML.includes('AI is thinking')) {
+                    chatMessages.removeChild(lastMsg);
+                }
+                if (response.status === 429) {
+                    addMessage('⚠️ Rate limit exceeded. Please wait about 60 seconds before asking another question. (Free tier: 5 requests per minute)', 'bot');
+                    showRateLimitWarning(chatMessages, 'Too many requests. Please wait.');
+                } else if (data.success) {
+                    addMessage(data.answer, 'bot');
+                } else {
+                    addMessage(`Error: ${escapeHtml(data.error)}`, 'bot');
+                }
+            } catch (err) {
+                const lastMsg = chatMessages.lastChild;
+                if (lastMsg && lastMsg.innerHTML.includes('AI is thinking')) {
+                    chatMessages.removeChild(lastMsg);
+                }
+                addMessage(`Request failed: ${escapeHtml(err.message)}`, 'bot');
+            }
+        };
+
+        function addMessageWithReturn(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender === 'user' ? 'user-message' : 'bot-message'}`;
+            msgDiv.innerHTML = sender === 'bot' ? text : escapeHtml(text).replace(/\n/g, '<br>');
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return msgDiv;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && sendBtn.disabled === false) {
+                sendBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
